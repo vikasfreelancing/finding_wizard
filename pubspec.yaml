@@ -1,0 +1,24 @@
+name: lost_and_found
+description: A flutter application for finding lost things and persons
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^0.1.2
+  geolocator: ^5.2.1
+  http: ^0.12.0+4
+  image_picker: 0.6.3+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - logo.png
+    - Custom-Logos.png
