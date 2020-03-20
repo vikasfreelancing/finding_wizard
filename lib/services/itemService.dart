@@ -2,14 +2,17 @@ import 'package:http/http.dart' as http;
 import 'package:lost_and_found/dto/User.dart';
 import 'dart:convert' as decoder;
 
-class UserService {
+class ItemService {
   String data;
   int responseCode;
-  Future<void> registerUser(User user) async {
+  Future<void> saveItem(User user, List<String> images) async {
+    String url = "";
+    for (String s in images) url += s + ",";
     print(decoder.jsonEncode(user.toJson()));
     http.Response response = await http.post(
-      'https://userplatform.herokuapp.com/register',
-      body: decoder.jsonEncode(user.toJson()),
+      'http://localhost:9093/saveItem',
+      body: decoder
+          .jsonEncode({'images': url, 'userId': user.id, 'type': 'person'}),
       headers: {"Content-Type": "application/json"},
     );
     responseCode = response.statusCode;
@@ -20,24 +23,19 @@ class UserService {
     }
   }
 
-  Future<User> loginUser(String email, String password) async {
-    print(email);
-    print(password);
+  Future<void> saveFoundItem(User user, String url) async {
+    print(decoder.jsonEncode(user.toJson()));
     http.Response response = await http.post(
-      'https://userplatform.herokuapp.com/login',
+      'http://localhost:9093/saveFoundItem',
       body: decoder
-          .jsonEncode({'email': email.trim(), 'password': password.trim()}),
+          .jsonEncode({'images': url, 'userId': user.id, 'type': 'person'}),
       headers: {"Content-Type": "application/json"},
     );
     responseCode = response.statusCode;
     print(responseCode);
     if (responseCode == 200) {
-      print(response);
       data = response.body;
       print(data);
-      if (response == null || data == null) return null;
-      return User.fromJson(decoder.json.decode(data));
-    } else
-      return null;
+    }
   }
 }

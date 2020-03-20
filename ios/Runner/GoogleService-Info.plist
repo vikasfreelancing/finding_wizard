@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>685044556716-0ajin7bv9cf5ru40pos0ttsd4ntpl43q.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.685044556716-0ajin7bv9cf5ru40pos0ttsd4ntpl43q</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>685044556716-nur9sqb8snc4ssvk8u80v08gvm4d0aq1.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBbvTB08OY88fYqLxEylGYQXNGHusmVh74</string>
+	<key>GCM_SENDER_ID</key>
+	<string>685044556716</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>co.viku826693.lostAndFound</string>
+	<key>PROJECT_ID</key>
+	<string>lost-and-found-dc2ae</string>
+	<key>STORAGE_BUCKET</key>
+	<string>lost-and-found-dc2ae.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:685044556716:ios:368430f4bddf6633951009</string>
+	<key>DATABASE_URL</key>
+	<string>https://lost-and-found-dc2ae.firebaseio.com</string>
+</dict>
+</plist>

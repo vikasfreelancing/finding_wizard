@@ -1,5 +1,5 @@
 class User {
-  String Id;
+  String id;
   String name;
   String email;
   String password;
@@ -17,6 +17,6 @@ class User {
       : name = json['name'],
         email = json['email'],
         password = json['password'],
-        Id = json['Id'],
+        id = json['id'],
         phone = json['phone'];
 }

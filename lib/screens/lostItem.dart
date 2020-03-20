@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:lost_and_found/dto/User.dart';
+import 'package:lost_and_found/services/itemService.dart';
+import 'package:lost_and_found/services/uploadService.dart';
 /*
 * Item Service base url https://itemservice.herokuapp.com
 * */
 
-class NewItem extends StatefulWidget {
+class LostItem extends StatefulWidget {
+  LostItem({this.user});
+  final User user;
   @override
-  _NewItemState createState() => _NewItemState();
+  _LostItemState createState() => _LostItemState(user: user);
 }
 
-class _NewItemState extends State<NewItem> {
+class _LostItemState extends State<LostItem> {
+  _LostItemState({this.user});
+  User user;
   List<File> _images = List<File>();
+  List<String> imageUrls = List<String>();
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
-
+  UploadService uploadService = UploadService();
   TextStyle styleCountGreen = TextStyle(
     fontFamily: 'Montserrat',
     fontSize: 30.0,
@@ -77,6 +85,19 @@ class _NewItemState extends State<NewItem> {
     });
   }
 
+  Future<void> upload() async {
+    for (File f in _images) {
+      dynamic s = await uploadService.uploadFile(f);
+      imageUrls.add(s.toString());
+    }
+    print("calling item Service");
+    ItemService i = ItemService();
+    print(imageUrls);
+    await i.saveItem(user, imageUrls);
+    print(i.responseCode);
+    print(i.data);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -86,6 +107,7 @@ class _NewItemState extends State<NewItem> {
   int panding = 6;
   @override
   Widget build(BuildContext context) {
+    print(user.id);
     final uploadButton = Material(
       elevation: 5.0,
       borderRadius: BorderRadius.circular(30.0),
@@ -93,7 +115,12 @@ class _NewItemState extends State<NewItem> {
       child: MaterialButton(
         minWidth: MediaQuery.of(context).size.width,
         padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-        onPressed: () {},
+        onPressed: () async {
+          print("uploading");
+          await upload();
+          print("////// image urlls");
+          print(imageUrls);
+        },
         child: Text("Upload",
             textAlign: TextAlign.center,
             style: style.copyWith(

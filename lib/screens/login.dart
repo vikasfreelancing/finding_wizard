@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/constants/constants.dart';
+import 'package:lost_and_found/screens/deshboard.dart';
+import 'package:lost_and_found/screens/lostItem.dart';
 import 'package:lost_and_found/services/userService.dart';
 import 'package:lost_and_found/dto/User.dart';
 
@@ -12,9 +14,16 @@ class _LogInState extends State<LogIn> {
   String email, password;
   UserService userService = UserService();
   void login() async {
+    print(email);
     User user = await userService.loginUser(email, password);
+    print(user);
     if (user != null) {
-      Navigator.pushNamed(context, '/newItem');
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DashBoard(user: user),
+        ),
+      );
     } else {
       print('invalid user name or password');
     }

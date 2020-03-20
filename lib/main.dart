@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lost_and_found/screens/newItem.dart';
+import 'package:lost_and_found/screens/lostItem.dart';
 import 'home.dart';
 import 'screens/login.dart';
 import 'screens/register.dart';
@@ -19,7 +19,7 @@ class LostAndFoundApp extends StatelessWidget {
         "/": (context) => Home(),
         "/login": (context) => LogIn(),
         "/registor": (context) => Register(),
-        "/newItem": (context) => NewItem()
+        "/newItem": (context) => LostItem()
       },
     );
   }
