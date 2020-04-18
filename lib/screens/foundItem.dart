@@ -1,58 +1,170 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'dart:ui' as UI;
 import 'package:lost_and_found/dto/User.dart';
+import 'package:lost_and_found/facedetection/facepainter.dart';
 import 'package:lost_and_found/services/itemService.dart';
 import 'package:lost_and_found/services/uploadService.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'loading.dart';
+import 'deshboard.dart';
 /*
 * Item Service base url https://itemservice.herokuapp.com
 * */
 
 class FoundItem extends StatefulWidget {
-  FoundItem({this.user});
+  FoundItem(
+      {this.user,
+      this.image,
+      this.customPainter,
+      this.decodeImage,
+      this.faces});
   final User user;
+  final File image;
+  final CustomPainter customPainter;
+  final UI.Image decodeImage;
+  final List<Face> faces;
   @override
-  _FoundItemState createState() => _FoundItemState(user: user);
+  _FoundItemState createState() => _FoundItemState();
 }
 
 class _FoundItemState extends State<FoundItem> {
+  @override
+  void initState() {
+    super.initState();
+    this.user = widget.user;
+    this.decodeImage = widget.decodeImage;
+    this.faces = widget.faces;
+    this.image = widget.image;
+  }
+
   _FoundItemState({this.user});
   User user;
+  UI.Image decodeImage;
   File image;
-  String imageUrl = "";
-  TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
+  List<Face> faces;
+  TextStyle style = TextStyle(
+      fontFamily: 'Montserrat', fontSize: 20.0, color: Colors.green[900]);
   UploadService uploadService = UploadService();
   TextStyle styleCountGreen = TextStyle(
     fontFamily: 'Montserrat',
     fontSize: 30.0,
     color: Colors.green[900],
   );
+
+  Widget get() {
+    if (image == null) return null;
+    List<Widget> I = List<Widget>();
+    return Expanded(
+      child: Column(
+        children: <Widget>[
+          Expanded(
+            flex: 10,
+            child: SizedBox(
+              width: decodeImage.width.toDouble(),
+              height: decodeImage.height.toDouble(),
+              child: CustomPaint(
+                painter: FacePainter(decodeImage, faces),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  image = null;
+                });
+              },
+              child: Icon(
+                Icons.close,
+                color: Colors.red[300],
+                size: 40,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   TextStyle styleCountRed = TextStyle(
       fontFamily: 'Montserrat', fontSize: 30.0, color: Colors.red[900]);
   Future getImageFromCamera() async {
-    image = await ImagePicker.pickImage(source: ImageSource.camera);
-    setState(() {
-      isUploaded = true;
-    });
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoadingScreen(
+              message: "Uploading Camera ",
+              task: () async {
+                File image = await ImagePicker.pickImage(
+                    source: ImageSource.camera, maxWidth: 300, maxHeight: 400);
+                this.image = image;
+                final FirebaseVisionImage visionImage =
+                    FirebaseVisionImage.fromFile(image);
+                final FaceDetector faceDetector =
+                    FirebaseVision.instance.faceDetector();
+                List<Face> faces = await faceDetector.processImage(visionImage);
+                this.faces = faces;
+                if (faces.length == 0) {
+                  print("No face found in image");
+                } else {
+                  UI.Image decodeImage =
+                      await decodeImageFromList(image.readAsBytesSync());
+                  this.decodeImage = decodeImage;
+                  for (var face in faces) {
+                    print(face.rightEyeOpenProbability);
+                  }
+                }
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FoundItem(
+                      user: this.user,
+                      image: this.image,
+                      decodeImage: this.decodeImage,
+                      faces: this.faces,
+                    ),
+                  ),
+                );
+              }),
+        ));
   }
 
   Future<void> upload() async {
-    dynamic s = await uploadService.uploadFile(f);
-    imageUrl = s.toString();
-    print("calling item Service");
-    ItemService itemService = ItemService();
-    print(imageUrl);
-    await itemService.saveItem(user, imageUrl);
-    print(itemService.responseCode);
-    print(itemService.data);
+    if (image == null) {
+      print("No image selected");
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => LoadingScreen(
+                message: "Saving Image",
+                task: () async {
+                  dynamic s = await uploadService.uploadFile(image);
+                  String imageUrl = s.toString();
+                  print("calling item Service");
+                  ItemService itemService = ItemService();
+                  print(imageUrl);
+                  await itemService.saveFoundItem(user, imageUrl);
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DashBoard(
+                                user: user,
+                                message:
+                                    "Found Item Saved Successfully Wil Get in touch soon ",
+                                color: Colors.green[900],
+                              )));
+                },
+              )),
+    );
   }
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  bool isUploaded = false;
   @override
   Widget build(BuildContext context) {
     print(user.id);
@@ -66,8 +178,6 @@ class _FoundItemState extends State<FoundItem> {
         onPressed: () async {
           print("uploading");
           await upload();
-          print("////// image urlls");
-          print(imageUrls);
         },
         child: Text("Upload",
             textAlign: TextAlign.center,
@@ -85,37 +195,19 @@ class _FoundItemState extends State<FoundItem> {
           Expanded(
             flex: 3,
             child: Center(
-              child: _images.isEmpty
-                  ? Text(
-                      "Please Select 6 Images of lost Item",
-                      style: style,
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Text(
-                          "$upLoaded ",
-                          style: styleCountGreen,
-                        ),
-                        Text(
-                          "Uploaded ",
-                          style: style,
-                        ),
-                        Text(
-                          "$panding",
-                          style: styleCountRed,
-                        ),
-                        Text(
-                          "Pending",
-                          style: style,
-                        )
-                      ],
-                    ),
-            ),
+                child: (image == null)
+                    ? Text(
+                        "Please Select Images of found Item",
+                        style: style,
+                      )
+                    : Text(
+                        "Image Selected Sucessfully",
+                        style: style,
+                      )),
           ),
           Expanded(
             flex: 8,
-            child: _images.isEmpty
+            child: image == null
                 ? Center(
                     child: Text(
                       "No Image selected",
@@ -127,7 +219,7 @@ class _FoundItemState extends State<FoundItem> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      children: get(),
+                      children: <Widget>[get()],
                     ),
                   ),
           ),
@@ -136,6 +228,9 @@ class _FoundItemState extends State<FoundItem> {
             child: Center(
                 child: Row(
               children: <Widget>[
+                Expanded(
+                  child: SizedBox(),
+                ),
                 Expanded(
                   child: uploadButton,
                 ),

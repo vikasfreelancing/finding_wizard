@@ -1,32 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/constants/constants.dart';
 import 'package:lost_and_found/screens/deshboard.dart';
-import 'package:lost_and_found/screens/lostItem.dart';
-import 'package:lost_and_found/services/userService.dart';
+import 'package:lost_and_found/screens/loading.dart';
 import 'package:lost_and_found/dto/User.dart';
+import 'package:lost_and_found/services/userService.dart';
 
 class LogIn extends StatefulWidget {
+  LogIn({this.message, this.color});
+  final String message;
+  final Color color;
   @override
-  _LogInState createState() => _LogInState();
+  _LogInState createState() => _LogInState(message: message, color: color);
 }
 
 class _LogInState extends State<LogIn> {
   String email, password;
-  UserService userService = UserService();
+  Color color = Colors.green;
+  _LogInState({this.message, this.color});
+  String message;
   void login() async {
-    print(email);
-    User user = await userService.loginUser(email, password);
-    print(user);
-    if (user != null) {
-      Navigator.push(
+    Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => DashBoard(user: user),
-        ),
-      );
-    } else {
-      print('invalid user name or password');
-    }
+          builder: (context) => LoadingScreen(
+              message: "Checking Credentilas ",
+              task: () async {
+                User user = await UserService().loginUser(email, password);
+                if (user != null) {
+                  print("Logged in user Id " + user.id);
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DashBoard(user: user),
+                    ),
+                  );
+                } else {
+                  print('invalid user name or password');
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LogIn(
+                        message: "invalid user name or password",
+                        color: Colors.red[900],
+                      ),
+                    ),
+                  );
+                }
+              }),
+        ));
   }
 
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
@@ -85,16 +108,22 @@ class _LogInState extends State<LogIn> {
             child: ListView(
               children: <Widget>[
                 Container(
-                  width: 155,
-                  height: 155,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset(
-                    'Custom-Logos.png',
+                    'logo2.png',
                   ),
                 ),
-                SizedBox(height: 45.0),
+                SizedBox(
+                  height: 45.0,
+                  child: Center(
+                    child: Text(
+                      message == null ? "" : message,
+                      style: TextStyle(color: color, fontSize: 20),
+                    ),
+                  ),
+                ),
                 emailField,
                 SizedBox(height: 25.0),
                 passwordField,

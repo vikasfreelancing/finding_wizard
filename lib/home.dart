@@ -6,9 +6,7 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Lets find together", style: kAppNameStyle),
-      ),
+      appBar: AppBar(),
       body: GestureDetector(
         onTap: () {
           Navigator.pushNamed(context, '/login');
@@ -20,7 +18,31 @@ class Home extends StatelessWidget {
             },
             child: Container(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
+                  Expanded(
+                    flex: 9,
+                    child: Container(
+                      padding: EdgeInsets.all(5),
+                      child: Image.asset(
+                        "ashok.jpg",
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 5,
+                    child: Container(
+                      padding: EdgeInsets.all(5),
+                      child: Center(
+                        child: Text(
+                          "LOST AND FOUND",
+                          style: kAppNameStyle.copyWith(
+                            color: Color(0xFFFB9932),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                   Expanded(
                     flex: 9,
                     child: Container(
@@ -35,10 +57,6 @@ class Home extends StatelessWidget {
                       child: Column(
                         children: <Widget>[
                           Text("Angel@CO", style: kCompanyNameStyle),
-                          Text(
-                            "LOST AND FOUND",
-                            style: kAppNameStyle,
-                          ),
                         ],
                       ),
                     ),

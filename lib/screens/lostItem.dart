@@ -4,22 +4,24 @@ import 'dart:io';
 import 'package:lost_and_found/dto/User.dart';
 import 'package:lost_and_found/services/itemService.dart';
 import 'package:lost_and_found/services/uploadService.dart';
+import 'package:lost_and_found/screens/loading.dart';
+import 'package:lost_and_found/screens/deshboard.dart';
 /*
 * Item Service base url https://itemservice.herokuapp.com
 * */
 
 class LostItem extends StatefulWidget {
-  LostItem({this.user});
+  LostItem({this.user, this.pics});
+  final List<File> pics;
   final User user;
   @override
-  _LostItemState createState() => _LostItemState(user: user);
+  _LostItemState createState() => _LostItemState(user: user, images: pics);
 }
 
 class _LostItemState extends State<LostItem> {
-  _LostItemState({this.user});
+  _LostItemState({this.user, this.images});
   User user;
-  List<File> _images = List<File>();
-  List<String> imageUrls = List<String>();
+  List<File> images;
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   UploadService uploadService = UploadService();
   TextStyle styleCountGreen = TextStyle(
@@ -31,7 +33,7 @@ class _LostItemState extends State<LostItem> {
       fontFamily: 'Montserrat', fontSize: 30.0, color: Colors.red[900]);
   List<Widget> get() {
     List<Widget> I = List<Widget>();
-    _images.forEach((file) {
+    images.forEach((file) {
       I.add(Expanded(
         child: Column(
           children: <Widget>[
@@ -44,9 +46,7 @@ class _LostItemState extends State<LostItem> {
               child: GestureDetector(
                 onTap: () {
                   setState(() {
-                    _images.remove(file);
-                    upLoaded--;
-                    panding++;
+                    images.remove(file);
                   });
                 },
                 child: Icon(
@@ -64,38 +64,88 @@ class _LostItemState extends State<LostItem> {
   }
 
   Future getImageFromCamera() async {
-    if (upLoaded == 6) return;
-    var image = await ImagePicker.pickImage(source: ImageSource.camera);
-
-    setState(() {
-      _images.add(image);
-      upLoaded++;
-      panding--;
-    });
+    if (images.length == 6) return;
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoadingScreen(
+              message: "Uploading Camera ",
+              task: () async {
+                var image =
+                    await ImagePicker.pickImage(source: ImageSource.camera);
+                images.add(image);
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LostItem(
+                      user: this.user,
+                      pics: this.images,
+                    ),
+                  ),
+                );
+              }),
+        ));
   }
 
   Future getImageFromGallery() async {
-    if (upLoaded == 6) return;
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-
-    setState(() {
-      _images.add(image);
-      upLoaded++;
-      panding--;
-    });
+    if (images.length == 6) return;
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoadingScreen(
+              message: "Uploading Gallery",
+              task: () async {
+                var image =
+                    await ImagePicker.pickImage(source: ImageSource.gallery);
+                images.add(image);
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LostItem(
+                      user: this.user,
+                      pics: this.images,
+                    ),
+                  ),
+                );
+              }),
+        ));
   }
 
   Future<void> upload() async {
-    for (File f in _images) {
-      dynamic s = await uploadService.uploadFile(f);
-      imageUrls.add(s.toString());
+    if (images == null || images.length == 0) {
+      print("No image selected");
+      return;
     }
-    print("calling item Service");
-    ItemService i = ItemService();
-    print(imageUrls);
-    await i.saveItem(user, imageUrls);
-    print(i.responseCode);
-    print(i.data);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => LoadingScreen(
+                message: "Saving Images",
+                task: () async {
+                  List<String> imageUrls = List<String>();
+                  for (File f in images) {
+                    dynamic s = await uploadService.uploadFile(f);
+                    imageUrls.add(s.toString());
+                  }
+                  print("calling item Service");
+                  ItemService itemService = ItemService();
+                  print("Image Urls : " + imageUrls.toString());
+                  await itemService.saveLostItem(user, imageUrls);
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DashBoard(
+                                user: user,
+                                message:
+                                    "Lost Item Saved Successfully Will Get in touch soon",
+                                color: Colors.green[900],
+                              )));
+                },
+              )),
+    );
   }
 
   @override
@@ -103,11 +153,12 @@ class _LostItemState extends State<LostItem> {
     super.initState();
   }
 
-  int upLoaded = 0;
-  int panding = 6;
   @override
   Widget build(BuildContext context) {
-    print(user.id);
+    int upLoaded = images.length;
+    int pending = 6 - images.length;
+    print("Logged in user " + user.id);
+    print("Images recived " + images.length.toString());
     final uploadButton = Material(
       elevation: 5.0,
       borderRadius: BorderRadius.circular(30.0),
@@ -118,8 +169,6 @@ class _LostItemState extends State<LostItem> {
         onPressed: () async {
           print("uploading");
           await upload();
-          print("////// image urlls");
-          print(imageUrls);
         },
         child: Text("Upload",
             textAlign: TextAlign.center,
@@ -137,7 +186,7 @@ class _LostItemState extends State<LostItem> {
           Expanded(
             flex: 3,
             child: Center(
-              child: _images.isEmpty
+              child: images.isEmpty
                   ? Text(
                       "Please Select 6 Images of lost Item",
                       style: style,
@@ -154,7 +203,7 @@ class _LostItemState extends State<LostItem> {
                           style: style,
                         ),
                         Text(
-                          "$panding",
+                          "$pending",
                           style: styleCountRed,
                         ),
                         Text(
@@ -167,7 +216,7 @@ class _LostItemState extends State<LostItem> {
           ),
           Expanded(
             flex: 8,
-            child: _images.isEmpty
+            child: images.isEmpty
                 ? Center(
                     child: Text(
                       "No Image selected",

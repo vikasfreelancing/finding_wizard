@@ -16,3 +16,11 @@ const TextStyle kAppNameStyle = TextStyle(
     fontSize: 30,
     wordSpacing: 5,
     letterSpacing: 2);
+
+const String itemServiceBaseUrl = aWSBaseUrl;
+const String herokuBaseUrl = "https://itemservice.herokuapp.com";
+const String aWSBaseUrl = "http://13.233.87.20:9093/";
+const String localBaseUrl = "http://192.168.43.18:9093/";
+const String userPlatformbaseUrl = userPlatformLocalUrl;
+const String userPlatFormHerokuUrl = "https://userplatform.herokuapp.com/";
+const String userPlatformLocalUrl = "http://192.168.43.18:9092/";

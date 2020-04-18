@@ -1,48 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/constants/constants.dart';
+import 'package:lost_and_found/screens/foundItem.dart';
 import 'package:lost_and_found/screens/lostItem.dart';
-import 'package:lost_and_found/services/userService.dart';
 import 'package:lost_and_found/dto/User.dart';
+import 'dart:io';
 
 class DashBoard extends StatefulWidget {
   final User user;
-  DashBoard({this.user});
+  final String message;
+  final Color color;
+  DashBoard({this.user, this.message, this.color});
   @override
   _DashBoard createState() => _DashBoard();
 }
 
 class _DashBoard extends State<DashBoard> {
   User user;
+  String message;
+  Color color;
   @override
   void initState() {
-    print("Dash board");
     super.initState();
     user = widget.user;
+    message = widget.message;
+    color = widget.color;
   }
 
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   @override
   Widget build(BuildContext context) {
-    print("dash board build");
     final lostSomething = Material(
       elevation: 5.0,
       borderRadius: BorderRadius.circular(15.0),
       color: Colors.white,
       child: MaterialButton(
         minWidth: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+        padding: EdgeInsets.fromLTRB(5.0, 2.0, 5.0, 2.0),
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => LostItem(user: user),
+              builder: (context) => LostItem(user: user, pics: List<File>()),
             ),
           );
         },
         child: Text("Lost Something",
             textAlign: TextAlign.center,
             style: style.copyWith(
-                color: Colors.red, fontWeight: FontWeight.bold, fontSize: 40)),
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 25.0)),
       ),
     );
     final foundSomething = Material(
@@ -51,16 +58,21 @@ class _DashBoard extends State<DashBoard> {
       color: Colors.white,
       child: MaterialButton(
         minWidth: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+        padding: EdgeInsets.fromLTRB(5.0, 2.0, 5.0, 2.0),
         onPressed: () {
-          //TODO : render found item
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FoundItem(user: user),
+            ),
+          );
         },
         child: Text("Found Something",
             textAlign: TextAlign.center,
             style: style.copyWith(
                 color: Colors.green,
                 fontWeight: FontWeight.bold,
-                fontSize: 40)),
+                fontSize: 25)),
       ),
     );
     return Scaffold(
@@ -75,18 +87,24 @@ class _DashBoard extends State<DashBoard> {
             child: ListView(
               children: <Widget>[
                 Container(
-                  width: 155,
-                  height: 155,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset(
-                    'Custom-Logos.png',
+                    'logo2.png',
                   ),
                 ),
-                SizedBox(height: 150.0),
+                SizedBox(
+                  height: 100.0,
+                  child: Center(
+                    child: Text(
+                      message == null ? "" : message,
+                      style: TextStyle(color: color, fontSize: 20),
+                    ),
+                  ),
+                ),
                 lostSomething,
-                SizedBox(height: 150.0),
+                SizedBox(height: 100.0),
                 foundSomething,
               ],
             ),

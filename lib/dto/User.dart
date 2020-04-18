@@ -5,6 +5,7 @@ class User {
   String password;
   String phone;
   String aadhar;
+  String message;
   User();
   Map<String, dynamic> toJson() => {
         'name': name,

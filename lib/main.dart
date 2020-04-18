@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/screens/lostItem.dart';
+import 'package:lost_and_found/screens/lostItemViewList.dart';
 import 'home.dart';
 import 'screens/login.dart';
 import 'screens/register.dart';
@@ -14,12 +15,13 @@ class LostAndFoundApp extends StatelessWidget {
         primaryColor: Color(0xFF6D60FB),
         scaffoldBackgroundColor: Color(0xFF6D60FB),
       ),
-      initialRoute: "/",
+      initialRoute: "/listItems",
       routes: {
         "/": (context) => Home(),
         "/login": (context) => LogIn(),
         "/registor": (context) => Register(),
-        "/newItem": (context) => LostItem()
+        "/newItem": (context) => LostItem(),
+        "/listItems": (context) => LostItemView(),
       },
     );
   }

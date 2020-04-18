@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:lost_and_found/constants/constants.dart';
 import 'package:lost_and_found/services/userService.dart';
 import 'package:lost_and_found/dto/User.dart';
+import 'package:lost_and_found/screens/loading.dart';
+import 'login.dart';
+import 'package:lost_and_found/constants/logo.dart';
 
 class Register extends StatefulWidget {
   @override
@@ -10,16 +13,49 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
-  void registorUser(User user) async {
-    UserService userService = UserService();
-    await userService.registerUser(user);
-    print(userService.responseCode);
-    if (userService.responseCode == 200) {
-      print(userService.data);
-      Navigator.pushNamed(context, '/login');
-    } else {
-      print(userService.responseCode);
-    }
+  void registerUser(User user) async {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoadingScreen(
+            message: "Saving Details :",
+            task: () async {
+              UserService userService = UserService();
+              User isRegistered = await userService.registerUser(user);
+              Color color;
+              if (isRegistered == null ||
+                  isRegistered.message == "Registered sucessfully")
+                color = Colors.red[900];
+              else
+                color = Colors.green[900];
+
+              print("isRegistered : " + isRegistered.toString());
+              if (isRegistered != null) {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LogIn(
+                      message: isRegistered.message,
+                      color: color,
+                    ),
+                  ),
+                );
+              } else {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LogIn(
+                      message: "Can not Register something went wrong",
+                      color: color,
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
+        ));
   }
 
   User user = User();
@@ -77,8 +113,7 @@ class _RegisterState extends State<Register> {
               OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))),
     );
     final passwordField = TextField(
-      onSubmitted: (text) {
-        print('submitted called');
+      onChanged: (text) {
         user.password = text;
       },
       obscureText: true,
@@ -106,9 +141,9 @@ class _RegisterState extends State<Register> {
         minWidth: MediaQuery.of(context).size.width,
         padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
         onPressed: () {
-          print(user.phone);
-          print(user.password);
-          registorUser(user);
+          //print(user.phone);
+          //print(user.password);
+          registerUser(user);
         },
         child: Text("Register",
             textAlign: TextAlign.center,
@@ -129,13 +164,11 @@ class _RegisterState extends State<Register> {
             child: ListView(
               children: <Widget>[
                 Container(
-                  width: 155,
-                  height: 70,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset(
-                    'Custom-Logos.png',
+                    'logo2.png',
                   ),
                 ),
                 SizedBox(height: 45.0),
