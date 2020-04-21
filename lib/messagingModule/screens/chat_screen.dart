@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:lost_and_found/messagingModule/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lost_and_found/widget/sideMenu.dart';
 
+/*Firestore.instance
+    .collection('talks')
+    .where("topic", isEqualTo: "flutter")
+    .snapshots()
+    .listen((data) =>
+        data.documents.forEach((doc) => print(doc["title"])));*/
 final _firestore = Firestore.instance;
 FirebaseUser loggedInUser;
 
@@ -39,6 +46,8 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: NavDrawer(),
+      backgroundColor: Color(0xFFE0D8D1),
       appBar: AppBar(
         leading: null,
         actions: <Widget>[
@@ -49,8 +58,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 Navigator.pop(context);
               }),
         ],
-        title: Text('⚡️Chat'),
-        backgroundColor: Colors.lightBlueAccent,
+        title: Text(
+          'Chat',
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Color(0xFFE5DDD5),
       ),
       body: SafeArea(
         child: Column(
@@ -69,6 +81,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       onChanged: (value) {
                         messageText = value;
                       },
+                      style: TextStyle(color: Colors.black),
                       decoration: kMessageTextFieldDecoration,
                     ),
                   ),
@@ -78,6 +91,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       _firestore.collection('messages').add({
                         'text': messageText,
                         'sender': loggedInUser.email,
+                        'reciver': loggedInUser.email
                       });
                     },
                     child: Text(
@@ -104,7 +118,7 @@ class MessagesStream extends StatelessWidget {
         if (!snapshot.hasData) {
           return Center(
             child: CircularProgressIndicator(
-              backgroundColor: Colors.lightBlueAccent,
+              backgroundColor: Colors.grey,
             ),
           );
         }
@@ -151,13 +165,6 @@ class MessageBubble extends StatelessWidget {
         crossAxisAlignment:
             isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            sender,
-            style: TextStyle(
-              fontSize: 12.0,
-              color: Colors.black54,
-            ),
-          ),
           Material(
             borderRadius: isMe
                 ? BorderRadius.only(
@@ -170,13 +177,13 @@ class MessageBubble extends StatelessWidget {
                     topRight: Radius.circular(30.0),
                   ),
             elevation: 5.0,
-            color: isMe ? Colors.lightBlueAccent : Colors.white,
+            color: isMe ? Color(0xFFDCF8C6) : Color(0xFFF9F9F9),
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
               child: Text(
                 text,
                 style: TextStyle(
-                  color: isMe ? Colors.white : Colors.black54,
+                  color: isMe ? Color(0xFF6C7765) : Color(0xFF303030),
                   fontSize: 15.0,
                 ),
               ),
