@@ -3,7 +3,7 @@ class LostItem {
   String images;
   String userId;
   String type;
-  bool isFound;
+  bool found;
   String foundId;
   String createdAt;
   String modifiedAt;
@@ -12,7 +12,7 @@ class LostItem {
         'images': images,
         'userId': userId,
         'type': type,
-        'isFound': isFound,
+        'found': found,
         'foundId': foundId,
         'createdAt': createdAt,
         'modifiedAt': modifiedAt
@@ -22,7 +22,7 @@ class LostItem {
         images = json['images'],
         userId = json['userId'],
         type = json['type'],
-        isFound = json['isFound'],
+        found = json['found'],
         foundId = json['foundId'],
         createdAt = json['createdAt'],
         modifiedAt = json['modifiedAt'];

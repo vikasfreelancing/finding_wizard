@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/constants/constants.dart';
-import 'package:lost_and_found/screens/deshboard.dart';
+import 'package:lost_and_found/model/LostItem.dart';
 import 'package:lost_and_found/screens/loading.dart';
 import 'package:lost_and_found/dto/User.dart';
+import 'package:lost_and_found/screens/lostItemViewList.dart';
+import 'package:lost_and_found/services/itemService.dart';
 import 'package:lost_and_found/services/userService.dart';
 
 class LogIn extends StatefulWidget {
@@ -32,7 +34,21 @@ class _LogInState extends State<LogIn> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => DashBoard(user: user),
+                      builder: (context) => LoadingScreen(
+                        message: "Loading Data ",
+                        task: () async {
+                          List<LostItem> items =
+                              await ItemService().getLostItems(user.id);
+                          Navigator.pop(context);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LostItemView(
+                                        items: items,
+                                        user: user,
+                                      )));
+                        },
+                      ),
                     ),
                   );
                 } else {

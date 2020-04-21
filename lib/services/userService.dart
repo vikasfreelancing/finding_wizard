@@ -9,7 +9,7 @@ class UserService {
   Future<User> registerUser(User user) async {
     print(decoder.jsonEncode(user.toJson()));
     http.Response response = await http.post(
-      userPlatformbaseUrl + '/user/register',
+      userPlatformbaseUrl + 'user/register',
       body: decoder.jsonEncode(user.toJson()),
       headers: {"Content-Type": "application/json"},
     );

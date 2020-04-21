@@ -7,6 +7,7 @@ import 'package:lost_and_found/facedetection/facepainter.dart';
 import 'package:lost_and_found/services/itemService.dart';
 import 'package:lost_and_found/services/uploadService.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:lost_and_found/widget/sideMenu.dart';
 import 'loading.dart';
 import 'deshboard.dart';
 /*
@@ -19,12 +20,14 @@ class FoundItem extends StatefulWidget {
       this.image,
       this.customPainter,
       this.decodeImage,
-      this.faces});
+      this.faces,
+      this.message});
   final User user;
   final File image;
   final CustomPainter customPainter;
   final UI.Image decodeImage;
   final List<Face> faces;
+  final String message;
   @override
   _FoundItemState createState() => _FoundItemState();
 }
@@ -37,6 +40,7 @@ class _FoundItemState extends State<FoundItem> {
     this.decodeImage = widget.decodeImage;
     this.faces = widget.faces;
     this.image = widget.image;
+    this.message = widget.message;
   }
 
   _FoundItemState({this.user});
@@ -44,6 +48,7 @@ class _FoundItemState extends State<FoundItem> {
   UI.Image decodeImage;
   File image;
   List<Face> faces;
+  String message;
   TextStyle style = TextStyle(
       fontFamily: 'Montserrat', fontSize: 20.0, color: Colors.green[900]);
   UploadService uploadService = UploadService();
@@ -107,8 +112,11 @@ class _FoundItemState extends State<FoundItem> {
                     FirebaseVision.instance.faceDetector();
                 List<Face> faces = await faceDetector.processImage(visionImage);
                 this.faces = faces;
+                String message = "";
                 if (faces.length == 0) {
+                  this.image = null;
                   print("No face found in image");
+                  message = "No face found in image";
                 } else {
                   UI.Image decodeImage =
                       await decodeImageFromList(image.readAsBytesSync());
@@ -126,6 +134,7 @@ class _FoundItemState extends State<FoundItem> {
                       image: this.image,
                       decodeImage: this.decodeImage,
                       faces: this.faces,
+                      message: message,
                     ),
                   ),
                 );
@@ -186,6 +195,9 @@ class _FoundItemState extends State<FoundItem> {
       ),
     );
     return Scaffold(
+      drawer: NavDrawer(
+        user: user,
+      ),
       appBar: AppBar(
         title: Text('Add new Lost Item'),
       ),
@@ -197,7 +209,9 @@ class _FoundItemState extends State<FoundItem> {
             child: Center(
                 child: (image == null)
                     ? Text(
-                        "Please Select Images of found Item",
+                        (message == null)
+                            ? "Please Select Images of found Item"
+                            : message,
                         style: style,
                       )
                     : Text(

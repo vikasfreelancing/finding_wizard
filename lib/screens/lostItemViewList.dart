@@ -1,30 +1,92 @@
 import 'package:flutter/material.dart';
+import 'package:lost_and_found/constants/constants.dart';
+import 'package:lost_and_found/model/LostItem.dart';
 import 'package:lost_and_found/screens/deshboard.dart';
 import 'package:lost_and_found/dto/User.dart';
 import 'package:lost_and_found/services/itemService.dart';
-import 'package:lost_and_found/services/userService.dart';
+import 'package:lost_and_found/widget/mylostcard.dart';
+import 'package:lost_and_found/widget/sideMenu.dart';
+import 'package:lost_and_found/screens/loading.dart';
 
 class LostItemView extends StatefulWidget {
+  LostItemView({this.items, this.user});
+  final List<LostItem> items;
+  final User user;
   @override
   _LostItemViewState createState() => _LostItemViewState();
 }
 
 class _LostItemViewState extends State<LostItemView> {
+  List<LostItem> items;
+  User user;
+  void loadData() async {
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoadingScreen(
+          message: "Loading Data ",
+          task: () async {
+            List<LostItem> items = await ItemService().getLostItems(user.id);
+            Navigator.pop(context);
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => LostItemView(
+                          items: items,
+                          user: user,
+                        )));
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    X();
+    items = widget.items;
+    user = widget.user;
+    if (items == null) {
+      loadData();
+    }
   }
 
-  void X() async {
-    User user = await UserService().loginUser("1", "1");
-    await ItemService().getLostItems(user.id);
+//  void X() async {
+//    User user = await UserService().loginUser("1", "1");
+//    await ItemService().getLostItems(user.id);
+//  }
+//
+//  void Y() async {
+//    User user = await UserService().loginUser("1", "1");
+//    await ItemService().getFoundItems(user.id);
+//  }
+
+  List<Widget> getCard() {
+    List<Widget> cards = List();
+    if (items != null && items.length == 0) {
+      Container txt = Container(
+          padding: EdgeInsets.symmetric(vertical: 150, horizontal: 10),
+          child: Text("No Request Recived ",
+              style: kAppNameStyle.copyWith(color: Colors.green[900])));
+      cards.add(txt);
+    } else
+      this.items.forEach((lostItem) {
+        cards.add(MyLostCard(
+          item: lostItem,
+          viewDetails: true,
+        ));
+      });
+    return cards;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: NavDrawer(
+        user: user,
+      ),
       appBar: AppBar(
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -42,7 +104,7 @@ class _LostItemViewState extends State<LostItemView> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => DashBoard(
-                                user: User(),
+                                user: user,
                               )));
                 },
               ),
@@ -50,43 +112,9 @@ class _LostItemViewState extends State<LostItemView> {
           ],
         ),
       ),
-      body: MyCustomCard(),
-    );
-  }
-}
-
-class MyCustomCard extends StatelessWidget {
-  MyCustomCard({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        height: 300,
-        child: Card(
-          color: Colors.black,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const ListTile(
-                leading: Icon(Icons.album),
-                title: Text('The Enchanted Nightingale'),
-                subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
-              ),
-              ButtonBar(
-                children: <Widget>[
-                  FlatButton(
-                    child: const Text('BUY TICKETS'),
-                    onPressed: () {/* ... */},
-                  ),
-                  FlatButton(
-                    child: const Text('LISTEN'),
-                    onPressed: () {/* ... */},
-                  ),
-                ],
-              ),
-            ],
-          ),
+      body: Container(
+        child: ListView(
+          children: getCard(),
         ),
       ),
     );

@@ -6,20 +6,31 @@ import 'package:lost_and_found/services/itemService.dart';
 import 'package:lost_and_found/services/uploadService.dart';
 import 'package:lost_and_found/screens/loading.dart';
 import 'package:lost_and_found/screens/deshboard.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:lost_and_found/widget/sideMenu.dart';
 /*
 * Item Service base url https://itemservice.herokuapp.com
 * */
 
 class LostItem extends StatefulWidget {
-  LostItem({this.user, this.pics});
+  LostItem({this.user, this.pics, this.message});
   final List<File> pics;
   final User user;
+  final String message;
   @override
   _LostItemState createState() => _LostItemState(user: user, images: pics);
 }
 
 class _LostItemState extends State<LostItem> {
+  @override
+  void initState() {
+    super.initState();
+    message = widget.message;
+  }
+
   _LostItemState({this.user, this.images});
+  String message;
   User user;
   List<File> images;
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
@@ -73,7 +84,21 @@ class _LostItemState extends State<LostItem> {
               task: () async {
                 var image =
                     await ImagePicker.pickImage(source: ImageSource.camera);
-                images.add(image);
+                final FirebaseVisionImage visionImage =
+                    FirebaseVisionImage.fromFile(image);
+                final FaceDetector faceDetector =
+                    FirebaseVision.instance.faceDetector();
+                List<Face> faces = await faceDetector.processImage(visionImage);
+                String message;
+                if (faces == null || faces.length == 0) {
+                  message = "No Face Found in image";
+                } else {
+                  if (faces.length > 1)
+                    message = "More then one face found in image";
+                  else {
+                    images.add(image);
+                  }
+                }
                 Navigator.pop(context);
                 Navigator.push(
                   context,
@@ -81,6 +106,7 @@ class _LostItemState extends State<LostItem> {
                     builder: (context) => LostItem(
                       user: this.user,
                       pics: this.images,
+                      message: message,
                     ),
                   ),
                 );
@@ -98,15 +124,27 @@ class _LostItemState extends State<LostItem> {
               task: () async {
                 var image =
                     await ImagePicker.pickImage(source: ImageSource.gallery);
-                images.add(image);
+                final FirebaseVisionImage visionImage =
+                    FirebaseVisionImage.fromFile(image);
+                final FaceDetector faceDetector =
+                    FirebaseVision.instance.faceDetector();
+                List<Face> faces = await faceDetector.processImage(visionImage);
+                String message;
+                if (faces == null || faces.length == 0) {
+                  message = "No face found in image";
+                } else {
+                  if (faces.length > 1)
+                    message = "More then one face found in image";
+                  else {
+                    images.add(image);
+                  }
+                }
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => LostItem(
-                      user: this.user,
-                      pics: this.images,
-                    ),
+                        user: this.user, pics: this.images, message: message),
                   ),
                 );
               }),
@@ -114,8 +152,10 @@ class _LostItemState extends State<LostItem> {
   }
 
   Future<void> upload() async {
-    if (images == null || images.length == 0) {
-      print("No image selected");
+    if (images == null || images.length < 3) {
+      setState(() {
+        this.message = "Add atleast 3 images of lost person";
+      });
       return;
     }
     Navigator.push(
@@ -149,11 +189,6 @@ class _LostItemState extends State<LostItem> {
   }
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     int upLoaded = images.length;
     int pending = 6 - images.length;
@@ -177,12 +212,27 @@ class _LostItemState extends State<LostItem> {
       ),
     );
     return Scaffold(
+      drawer: NavDrawer(
+        user: user,
+      ),
       appBar: AppBar(
         title: Text('Add new Lost Item'),
       ),
       body: Center(
           child: Column(
         children: <Widget>[
+          (message != null)
+              ? Expanded(
+                  flex: 3,
+                  child: Text(
+                    "${this.message}",
+                    style: style.copyWith(color: Colors.red[900]),
+                  ),
+                )
+              : Expanded(
+                  flex: 1,
+                  child: SizedBox(),
+                ),
           Expanded(
             flex: 3,
             child: Center(

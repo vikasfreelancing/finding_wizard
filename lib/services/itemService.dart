@@ -4,6 +4,7 @@ import 'dart:convert' as decoder;
 import 'package:lost_and_found/constants/constants.dart';
 import 'package:lost_and_found/model/findItem.dart';
 import 'package:lost_and_found/model/LostItem.dart';
+import 'package:lost_and_found/model/lostItemDetails.dart';
 
 class ItemService {
   String data;
@@ -49,17 +50,48 @@ class ItemService {
   Future<List<LostItem>> getLostItems(String userId) async {
     print(" Calling getLost Item Service");
     String url = (userId == null)
-        ? userPlatformbaseUrl + '/items/lost/items'
-        : userPlatformbaseUrl + '/items/lost/items?user_id=' + userId;
+        ? userPlatformbaseUrl + 'items/lost/items'
+        : userPlatformbaseUrl + 'items/lost/items?user_id=' + userId;
     http.Response response =
         await http.get(url, headers: {"Content-Type": "application/json"});
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 && response.body != null) {
       print("Response get Lost Items : " + response.body);
       List<LostItem> items = (decoder.json.decode(response.body) as List)
           .map((i) => LostItem.fromJson(i))
           .toList();
-      print(items.last.createdAt + " , " + items.last.id);
       return items;
+    } else
+      return null;
+  }
+
+  Future<List<FoundItem>> getFoundItems(String userId) async {
+    print(" Calling getFound Item Service");
+    String url = (userId == null)
+        ? userPlatformbaseUrl + 'items/found/items'
+        : userPlatformbaseUrl + 'items/found/items?user_id=' + userId;
+    http.Response response =
+        await http.get(url, headers: {"Content-Type": "application/json"});
+    if (response.statusCode == 200) {
+      print("Response get Found Items : " + response.body);
+      List<FoundItem> items = (decoder.json.decode(response.body) as List)
+          .map((i) => FoundItem.fromJson(i))
+          .toList();
+      return items;
+    } else
+      return null;
+  }
+
+  Future<LostItemDetailsModel> getLostItemDetails(String itemId) async {
+    if (itemId == null) return null;
+    String url =
+        userPlatformbaseUrl + 'items/lost/item/details?item_id=' + itemId;
+    http.Response response =
+        await http.get(url, headers: {"Content-Type": "application/json"});
+    if (response.statusCode == 200) {
+      print("Response get Lost Item Details : " + response.body);
+      LostItemDetailsModel lostItemDetails =
+          LostItemDetailsModel.fromJson(decoder.json.decode(response.body));
+      return lostItemDetails;
     } else
       return null;
   }

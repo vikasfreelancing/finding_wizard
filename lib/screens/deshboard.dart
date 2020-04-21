@@ -5,6 +5,8 @@ import 'package:lost_and_found/screens/lostItem.dart';
 import 'package:lost_and_found/dto/User.dart';
 import 'dart:io';
 
+import 'package:lost_and_found/widget/sideMenu.dart';
+
 class DashBoard extends StatefulWidget {
   final User user;
   final String message;
@@ -76,6 +78,9 @@ class _DashBoard extends State<DashBoard> {
       ),
     );
     return Scaffold(
+      drawer: NavDrawer(
+        user: user,
+      ),
       appBar: AppBar(
         title: Text("Welcome " + user.name, style: kAppNameStyle),
       ),
