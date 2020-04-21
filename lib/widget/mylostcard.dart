@@ -91,19 +91,19 @@ class _MyLostCardState extends State<MyLostCard> {
                     children: <Widget>[
                       (item != null && item.found != null && item.found)
                           ? Container(
-                              padding: EdgeInsets.all(5),
+                              padding: EdgeInsets.all(3),
                               child: Row(
                                 children: <Widget>[
                                   Icon(
                                     Icons.check,
                                     color: Colors.green[900],
-                                    size: 30,
+                                    size: 25,
                                   ),
                                   Text(
                                     "This Item is found",
                                     style: TextStyle(
                                         color: Colors.green[500],
-                                        fontSize: 20,
+                                        fontSize: 15,
                                         fontWeight: FontWeight.bold),
                                   )
                                 ],
