@@ -89,12 +89,31 @@ class _MyLostCardState extends State<MyLostCard> {
                 child: Container(
                   child: ButtonBar(
                     children: <Widget>[
-                      Text(
-                        (item != null && item.found != null && item.found)
-                            ? "This Item is Founded "
-                            : "This Item not yet founded",
-                        style: TextStyle(color: Colors.purple, fontSize: 10),
-                      ),
+                      (item != null && item.found != null && item.found)
+                          ? Container(
+                              padding: EdgeInsets.all(5),
+                              child: Row(
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.check,
+                                    color: Colors.green[900],
+                                    size: 30,
+                                  ),
+                                  Text(
+                                    "This Item is found",
+                                    style: TextStyle(
+                                        color: Colors.green[500],
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold),
+                                  )
+                                ],
+                              ),
+                            )
+                          : Text(
+                              "This Item not yet found",
+                              style:
+                                  TextStyle(color: Colors.purple, fontSize: 10),
+                            ),
                       FlatButton(
                         disabledTextColor: Colors.purple[50],
                         child: Text(
