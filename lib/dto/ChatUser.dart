@@ -1,4 +1,6 @@
-class User {
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class ChatUser {
   String id;
   String name;
   String email;
@@ -7,20 +9,22 @@ class User {
   String aadhar;
   String message;
   String chatId;
-  String profileImage;
-  User();
+  String lastMessage;
+  Timestamp last;
+  ChatUser();
   Map<String, dynamic> toJson() => {
         'name': name,
         'email': email,
         'password': password,
         'phone': phone,
-        'aadhar': aadhar
+        'aadhar': aadhar,
+        'chatId': chatId,
       };
-  User.fromJson(Map<String, dynamic> json)
+  ChatUser.fromJson(Map<String, dynamic> json)
       : name = json['name'],
         email = json['email'],
         password = json['password'],
         id = json['id'],
         phone = json['phone'],
-        aadhar = json['aadhar'];
+        chatId = json['chatId'];
 }

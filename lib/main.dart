@@ -19,7 +19,7 @@ class LostAndFoundApp extends StatelessWidget {
         primaryColor: Color(0xFF6D60FB),
         scaffoldBackgroundColor: Color(0xFF6D60FB),
       ),
-      initialRoute: WelcomeScreen.id,
+      initialRoute: "/",
       routes: {
         "/": (context) => Home(),
         "/login": (context) => LogIn(),

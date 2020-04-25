@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:lost_and_found/dto/User.dart';
 import 'package:lost_and_found/messagingModule/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lost_and_found/widget/sideMenu.dart';
+import 'package:lost_and_found/dto/ChatUser.dart';
 
 /*Firestore.instance
     .collection('talks')
@@ -11,9 +13,11 @@ import 'package:lost_and_found/widget/sideMenu.dart';
     .listen((data) =>
         data.documents.forEach((doc) => print(doc["title"])));*/
 final _firestore = Firestore.instance;
-FirebaseUser loggedInUser;
 
 class ChatScreen extends StatefulWidget {
+  ChatScreen({this.user, this.chatUser});
+  final User user;
+  final ChatUser chatUser;
   static const String id = 'chat_screen';
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -24,29 +28,22 @@ class _ChatScreenState extends State<ChatScreen> {
   final _auth = FirebaseAuth.instance;
 
   String messageText;
-
+  User user;
+  ChatUser chatUser;
   @override
   void initState() {
     super.initState();
-
-    getCurrentUser();
-  }
-
-  void getCurrentUser() async {
-    try {
-      final user = await _auth.currentUser();
-      if (user != null) {
-        loggedInUser = user;
-      }
-    } catch (e) {
-      print(e);
-    }
+    user = widget.user;
+    this.chatUser = widget.chatUser;
+    print("chat Started with chatId : " + chatUser.chatId);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: NavDrawer(),
+      drawer: NavDrawer(
+        user: user,
+      ),
       backgroundColor: Color(0xFFE0D8D1),
       appBar: AppBar(
         leading: null,
@@ -54,12 +51,11 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: Icon(Icons.close),
               onPressed: () {
-                _auth.signOut();
                 Navigator.pop(context);
               }),
         ],
         title: Text(
-          'Chat',
+          chatUser.name,
           style: TextStyle(color: Colors.black),
         ),
         backgroundColor: Color(0xFFE5DDD5),
@@ -69,7 +65,10 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            MessagesStream(),
+            MessagesStream(
+              user: user,
+              chatUser: chatUser,
+            ),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
@@ -90,8 +89,10 @@ class _ChatScreenState extends State<ChatScreen> {
                       messageTextController.clear();
                       _firestore.collection('messages').add({
                         'text': messageText,
-                        'sender': loggedInUser.email,
-                        'reciver': loggedInUser.email
+                        'sender': user.email,
+                        'receiver': chatUser.email,
+                        'time': Timestamp.now(),
+                        'chatId': chatUser.chatId
                       });
                     },
                     child: Text(
@@ -110,10 +111,17 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class MessagesStream extends StatelessWidget {
+  MessagesStream({this.user, this.chatUser});
+  final ChatUser chatUser;
+  final User user;
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('messages').snapshots(),
+      stream: _firestore
+          .collection('messages')
+          .where('chatId', isEqualTo: chatUser.chatId)
+          .orderBy('time', descending: true)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(
@@ -122,13 +130,13 @@ class MessagesStream extends StatelessWidget {
             ),
           );
         }
-        final messages = snapshot.data.documents.reversed;
+        final messages = snapshot.data.documents;
         List<MessageBubble> messageBubbles = [];
         for (var message in messages) {
           final messageText = message.data['text'];
           final messageSender = message.data['sender'];
 
-          final currentUser = loggedInUser.email;
+          final currentUser = user.email;
 
           final messageBubble = MessageBubble(
             sender: messageSender,

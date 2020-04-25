@@ -6,6 +6,7 @@ import 'package:lost_and_found/dto/User.dart';
 import 'package:lost_and_found/screens/lostItemViewList.dart';
 import 'package:lost_and_found/services/itemService.dart';
 import 'package:lost_and_found/services/userService.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LogIn extends StatefulWidget {
   LogIn({this.message, this.color});
@@ -16,6 +17,7 @@ class LogIn extends StatefulWidget {
 }
 
 class _LogInState extends State<LogIn> {
+  final _auth = FirebaseAuth.instance;
   String email, password;
   Color color = Colors.green;
   _LogInState({this.message, this.color});
@@ -75,6 +77,7 @@ class _LogInState extends State<LogIn> {
       onChanged: (text) {
         email = text;
       },
+      textAlign: TextAlign.center,
       obscureText: false,
       style: style,
       decoration: InputDecoration(
@@ -87,6 +90,7 @@ class _LogInState extends State<LogIn> {
       onChanged: (text) {
         password = text;
       },
+      textAlign: TextAlign.center,
       obscureText: true,
       style: style,
       decoration: InputDecoration(

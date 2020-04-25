@@ -4,7 +4,8 @@ import 'package:lost_and_found/services/userService.dart';
 import 'package:lost_and_found/dto/User.dart';
 import 'package:lost_and_found/screens/loading.dart';
 import 'login.dart';
-import 'package:lost_and_found/constants/logo.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:email_validator/email_validator.dart';
 
 class Register extends StatefulWidget {
   @override
@@ -12,6 +13,8 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
+  final _formKey = GlobalKey<FormState>();
+  final _auth = FirebaseAuth.instance;
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   void registerUser(User user) async {
     Navigator.push(
@@ -31,6 +34,11 @@ class _RegisterState extends State<Register> {
 
               print("isRegistered : " + isRegistered.toString());
               if (isRegistered != null) {
+                final authReg = await _auth.createUserWithEmailAndPassword(
+                    email: isRegistered.email, password: isRegistered.password);
+                if (authReg == null) {
+                  Navigator.pushNamed(context, "/");
+                }
                 Navigator.pop(context);
                 Navigator.push(
                   context,
@@ -61,11 +69,20 @@ class _RegisterState extends State<Register> {
   User user = User();
   @override
   Widget build(BuildContext context) {
-    final name = TextField(
+    final name = TextFormField(
       onChanged: (text) {
         user.name = text;
       },
+      validator: (name) {
+        Pattern pattern = r'^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$';
+        RegExp regex = new RegExp(pattern);
+        if (!regex.hasMatch(name))
+          return 'Invalid username';
+        else
+          return null;
+      },
       obscureText: false,
+      textAlign: TextAlign.center,
       style: style,
       decoration: InputDecoration(
           contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
@@ -73,7 +90,11 @@ class _RegisterState extends State<Register> {
           border:
               OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))),
     );
-    final email = TextField(
+    final email = TextFormField(
+      validator: (email) =>
+          EmailValidator.validate(email) ? null : "Invalid email address",
+      keyboardType: TextInputType.emailAddress,
+      textAlign: TextAlign.center,
       onChanged: (text) {
         user.email = text;
       },
@@ -85,7 +106,9 @@ class _RegisterState extends State<Register> {
           border:
               OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))),
     );
-    final phone = TextField(
+    final phone = TextFormField(
+      keyboardType: TextInputType.phone,
+      textAlign: TextAlign.center,
       onChanged: (text) {
         user.phone = text;
       },
@@ -97,12 +120,11 @@ class _RegisterState extends State<Register> {
           border:
               OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))),
     );
-    final aadhar = TextField(
+    final aadhar = TextFormField(
+      keyboardType: TextInputType.number,
+      textAlign: TextAlign.center,
       onChanged: (text) {
-        print('submitted not called');
-        print(text);
         user.aadhar = text;
-        print(user.aadhar);
       },
       obscureText: false,
       style: style,
@@ -112,24 +134,27 @@ class _RegisterState extends State<Register> {
           border:
               OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))),
     );
-    final passwordField = TextField(
+    final passwordField = TextFormField(
+      keyboardType: TextInputType.visiblePassword,
       onChanged: (text) {
         user.password = text;
       },
+      validator: (password) {
+        Pattern pattern = r'^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$';
+        RegExp regex = new RegExp(pattern);
+        if (!regex.hasMatch(password))
+          return 'Invalid password';
+        else if (password.length < 6)
+          return 'Min password length is 6';
+        else
+          return null;
+      },
+      textAlign: TextAlign.center,
       obscureText: true,
       style: style,
       decoration: InputDecoration(
           contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
           hintText: "Password",
-          border:
-              OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))),
-    );
-    final confirmPasswordField = TextField(
-      obscureText: true,
-      style: style,
-      decoration: InputDecoration(
-          contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-          hintText: "Confirm Password",
           border:
               OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))),
     );
@@ -143,7 +168,9 @@ class _RegisterState extends State<Register> {
         onPressed: () {
           //print(user.phone);
           //print(user.password);
-          registerUser(user);
+          if (_formKey.currentState.validate()) {
+            registerUser(user);
+          }
         },
         child: Text("Register",
             textAlign: TextAlign.center,
@@ -161,64 +188,63 @@ class _RegisterState extends State<Register> {
           color: Color(0xFF6D60FB),
           child: Padding(
             padding: const EdgeInsets.all(36.0),
-            child: ListView(
-              children: <Widget>[
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                  ),
-                  child: Image.asset(
-                    'logo2.png',
-                  ),
-                ),
-                SizedBox(height: 45.0),
-                name,
-                SizedBox(height: 25.0),
-                email,
-                SizedBox(
-                  height: 15.0,
-                ),
-                phone,
-                SizedBox(
-                  height: 15.0,
-                ),
-                aadhar,
-                SizedBox(
-                  height: 15.0,
-                ),
-                passwordField,
-                SizedBox(
-                  height: 15.0,
-                ),
-                confirmPasswordField,
-                SizedBox(
-                  height: 15.0,
-                ),
-                registerButton,
-                SizedBox(
-                  height: 15.0,
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      "Already have account?",
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                children: <Widget>[
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, "/login");
-                      },
-                      child: Text(
-                        "LogIn",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                        ),
+                    child: Image.asset(
+                      'logo2.png',
+                    ),
+                  ),
+                  SizedBox(height: 45.0),
+                  name,
+                  SizedBox(height: 25.0),
+                  email,
+                  SizedBox(
+                    height: 15.0,
+                  ),
+                  phone,
+                  SizedBox(
+                    height: 15.0,
+                  ),
+                  aadhar,
+                  SizedBox(
+                    height: 15.0,
+                  ),
+                  passwordField,
+                  SizedBox(
+                    height: 15.0,
+                  ),
+                  registerButton,
+                  SizedBox(
+                    height: 15.0,
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        "Already have account?",
                       ),
-                    )
-                  ],
-                ),
-              ],
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, "/login");
+                        },
+                        child: Text(
+                          "LogIn",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

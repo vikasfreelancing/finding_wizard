@@ -1,7 +1,9 @@
 import 'package:http/http.dart' as http;
+import 'package:lost_and_found/dto/ChatUser.dart';
 import 'package:lost_and_found/dto/User.dart';
 import 'dart:convert' as decoder;
 import 'package:lost_and_found/constants/constants.dart';
+import 'package:lost_and_found/dto/chatMapping.dart';
 
 class UserService {
   String data;
@@ -53,6 +55,41 @@ class UserService {
         return null;
       }
       return User.fromJson(decoder.json.decode(data));
+    } else
+      return null;
+  }
+
+  Future<List<ChatUser>> getAllUsers(String email) async {
+    print(" Calling get All Users Service");
+    String url = userPlatformbaseUrl + 'user/all?email=' + email;
+    http.Response response =
+        await http.get(url, headers: {"Content-Type": "application/json"});
+    if (response.statusCode == 200) {
+      print("Response get All Users : " + response.body);
+      List<ChatUser> items = (decoder.json.decode(response.body) as List)
+          .map((i) => ChatUser.fromJson(i))
+          .toList();
+      return items;
+    } else
+      return null;
+  }
+
+  Future<ChatMapping> createMapping(
+      String firstEmail, String secondEmail) async {
+    print("First  Email :" + firstEmail);
+    print("secound  Email :" + secondEmail);
+    http.Response response = await http.post(
+      userPlatformbaseUrl + 'user/createChatMapping',
+      body: decoder.jsonEncode(
+          {'firstEmail': firstEmail.trim(), 'secondEmail': secondEmail.trim()}),
+      headers: {"Content-Type": "application/json"},
+    );
+    responseCode = response.statusCode;
+    print("Response Code : " + responseCode.toString());
+    if (responseCode == 200 && response.body != null) {
+      data = response.body;
+      print("Response Body : " + data);
+      return ChatMapping.fromJson(decoder.json.decode(data));
     } else
       return null;
   }

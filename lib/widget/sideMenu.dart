@@ -1,9 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:lost_and_found/dto/ChatUser.dart';
 import 'package:lost_and_found/dto/User.dart';
+import 'package:lost_and_found/messagingModule/screens/chatDashBoard.dart';
 import 'package:lost_and_found/model/LostItem.dart';
 import 'package:lost_and_found/screens/lostItemViewList.dart';
 import 'package:lost_and_found/screens/loading.dart';
 import 'package:lost_and_found/services/itemService.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lost_and_found/services/userService.dart';
+import 'package:lost_and_found/widget/profile.dart';
 
 class NavDrawer extends StatefulWidget {
   NavDrawer({this.user});
@@ -13,6 +19,7 @@ class NavDrawer extends StatefulWidget {
 }
 
 class _NavDrawerState extends State<NavDrawer> {
+  final _auth = FirebaseAuth.instance;
   User user;
   @override
   void initState() {
@@ -67,7 +74,16 @@ class _NavDrawerState extends State<NavDrawer> {
           ListTile(
             leading: Icon(Icons.verified_user),
             title: Text('Profile'),
-            onTap: () {},
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => Profile(
+                          user: user,
+                        )),
+              );
+            },
           ),
           ListTile(
             leading: Icon(Icons.inbox),
@@ -77,9 +93,54 @@ class _NavDrawerState extends State<NavDrawer> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.border_color),
-            title: Text('Feedback'),
-            onTap: () {},
+            leading: Icon(Icons.message),
+            title: Text('Chat'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => LoadingScreen(
+                            message: "Loading chat ",
+                            task: () async {
+                              List<ChatUser> chatUsers =
+                                  await UserService().getAllUsers(user.email);
+                              for (ChatUser chatUser in chatUsers) {
+                                if (chatUser.chatId != null) {
+                                  final messages = await Firestore.instance
+                                      .collection('messages')
+                                      .where('chatId',
+                                          isEqualTo: chatUser.chatId)
+                                      .orderBy('time', descending: true)
+                                      .limit(1)
+                                      .getDocuments();
+                                  if (messages != null &&
+                                      messages.documents.length > 0) {
+                                    chatUser.lastMessage =
+                                        messages.documents.first.data['text'];
+                                    chatUser.last =
+                                        messages.documents.first.data['time'];
+                                  } else {
+                                    chatUser.lastMessage = "Lets Start chat";
+                                    chatUser.last = Timestamp.now();
+                                  }
+                                } else {
+                                  chatUser.lastMessage =
+                                      "Invite your friend to start chat ";
+                                  chatUser.last = Timestamp.now();
+                                }
+                              }
+                              Navigator.pop(context);
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ChatDashboard(
+                                            user: user,
+                                            chatUsers: chatUsers,
+                                          )));
+                            },
+                          )));
+            },
           ),
           ListTile(
             leading: Icon(Icons.exit_to_app),
