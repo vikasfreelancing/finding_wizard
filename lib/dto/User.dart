@@ -22,5 +22,6 @@ class User {
         password = json['password'],
         id = json['id'],
         phone = json['phone'],
-        aadhar = json['aadhar'];
+        aadhar = json['aadhar'],
+        profileImage = json['profileImage'];
 }

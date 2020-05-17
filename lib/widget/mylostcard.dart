@@ -98,10 +98,10 @@ class _MyLostCardState extends State<MyLostCard> {
                       FlatButton(
                         disabledTextColor: Colors.purple[50],
                         child: Text(
-                          'VIEW DETALIS',
+                          'VIEW DETAILS',
                           style: TextStyle(
                               color: Colors.purple[900],
-                              fontSize: 20,
+                              fontSize: 10,
                               fontWeight: (viewDetails &&
                                       item != null &&
                                       item.found != null &&

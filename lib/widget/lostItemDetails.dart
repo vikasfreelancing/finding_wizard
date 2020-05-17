@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:lost_and_found/dto/ChatUser.dart';
+import 'package:lost_and_found/messagingModule/screens/contactDetails.dart';
 import 'package:lost_and_found/model/lostItemDetails.dart' as model;
 import 'package:lost_and_found/constants/constants.dart';
+import 'package:lost_and_found/screens/loading.dart';
+import 'package:lost_and_found/services/userService.dart';
 import 'package:lost_and_found/widget/mylostcard.dart';
 
 class LostItemDetails extends StatefulWidget {
@@ -96,10 +100,46 @@ class _LostItemDetailsState extends State<LostItemDetails> {
                                     'CONTACT DETAILS',
                                     style: TextStyle(
                                         color: Colors.purple[900],
-                                        fontSize: 15,
+                                        fontSize: 10,
                                         fontWeight: FontWeight.bold),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    ChatUser chatUser = ChatUser();
+                                    chatUser.id = lostItemDetails.foundUser.id;
+                                    /*  String id;
+                                              String name;
+                                              String email;
+                                              String password;
+                                              String phone;
+                                              String aadhar;
+                                              String message;
+                                              String chatId;
+                                              String lastMessage;
+                                              Timestamp last;
+                                              String profileImage;*/
+                                    chatUser.name =
+                                        lostItemDetails.foundUser.name;
+                                    chatUser.email =
+                                        lostItemDetails.foundUser.email;
+                                    chatUser.password =
+                                        lostItemDetails.foundUser.password;
+                                    chatUser.phone =
+                                        lostItemDetails.foundUser.phone;
+                                    chatUser.aadhar =
+                                        lostItemDetails.foundUser.aadhar;
+                                    chatUser.chatId =
+                                        lostItemDetails.foundUser.chatId;
+                                    chatUser.profileImage =
+                                        lostItemDetails.foundUser.profileImage;
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                ContactDetails(
+                                                  user: lostItemDetails.user,
+                                                  chatUser: chatUser,
+                                                )));
+                                  },
                                 ),
                               ],
                             ),

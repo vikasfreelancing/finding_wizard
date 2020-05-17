@@ -93,4 +93,23 @@ class UserService {
     } else
       return null;
   }
+
+  Future<User> saveProfileImage(String email, String imageUrl) async {
+    print("email :" + email);
+    print("Image Url  :" + imageUrl);
+    http.Response response = await http.post(
+      userPlatformbaseUrl + 'user/saveProfileImage',
+      body: decoder
+          .jsonEncode({'profileImage': imageUrl.trim(), 'email': email.trim()}),
+      headers: {"Content-Type": "application/json"},
+    );
+    responseCode = response.statusCode;
+    print("Response Code : " + responseCode.toString());
+    if (responseCode == 200 && response.body != null) {
+      data = response.body;
+      print("Response Body : " + data);
+      return User.fromJson(decoder.json.decode(data));
+    } else
+      return null;
+  }
 }

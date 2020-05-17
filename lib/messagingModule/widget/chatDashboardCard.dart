@@ -31,7 +31,6 @@ class _ChatDashboardCardState extends State<ChatDashboardCard> {
       onTap: () {
         print("I taped");
         if (chatUser.chatId != null) {
-          Navigator.pop(context);
           Navigator.push(
               context,
               MaterialPageRoute(
@@ -52,12 +51,16 @@ class _ChatDashboardCardState extends State<ChatDashboardCard> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Expanded(
-                    flex: 1,
-                    child: Icon(
-                      Icons.message,
-                      size: 20,
-                      color: Colors.grey,
-                    ),
+                    flex: 2,
+                    child: (chatUser.profileImage == null)
+                        ? Icon(
+                            Icons.message,
+                            size: 20,
+                            color: Colors.grey,
+                          )
+                        : CircleImage(
+                            imageUrl: chatUser.profileImage,
+                          ),
                   ),
                   Expanded(
                     flex: 5,
@@ -128,6 +131,28 @@ class _ChatDashboardCardState extends State<ChatDashboardCard> {
                           ),
                   ),
                 ]),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CircleImage extends StatelessWidget {
+  CircleImage({this.imageUrl});
+  final String imageUrl;
+  @override
+  Widget build(BuildContext context) {
+    double _size = 60.0;
+    return Center(
+      child: new Container(
+        width: _size,
+        height: _size,
+        decoration: new BoxDecoration(
+          shape: BoxShape.circle,
+          image: new DecorationImage(
+            fit: BoxFit.fill,
+            image: new NetworkImage(imageUrl),
           ),
         ),
       ),

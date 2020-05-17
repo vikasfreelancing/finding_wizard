@@ -11,6 +11,7 @@ class ChatUser {
   String chatId;
   String lastMessage;
   Timestamp last;
+  String profileImage;
   ChatUser();
   Map<String, dynamic> toJson() => {
         'name': name,
@@ -26,5 +27,6 @@ class ChatUser {
         password = json['password'],
         id = json['id'],
         phone = json['phone'],
-        chatId = json['chatId'];
+        chatId = json['chatId'],
+        profileImage = json['profileImage'];
 }

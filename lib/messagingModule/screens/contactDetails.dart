@@ -1,66 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/dto/User.dart';
-import 'package:lost_and_found/services/uploadService.dart';
-import 'package:lost_and_found/services/userService.dart';
-import 'sideMenu.dart';
+import 'package:lost_and_found/dto/chatMapping.dart';
 import 'package:lost_and_found/screens/loading.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'package:lost_and_found/services/itemService.dart';
+import 'package:lost_and_found/services/userService.dart';
+import 'package:lost_and_found/widget/sideMenu.dart';
+import 'package:lost_and_found/dto/ChatUser.dart';
+import 'package:lost_and_found/messagingModule/screens/chat_screen.dart';
 
-class Profile extends StatefulWidget {
-  Profile({this.user});
+class ContactDetails extends StatefulWidget {
+  ContactDetails({this.user, this.chatUser});
+  final ChatUser chatUser;
   final User user;
   @override
-  _ProfileState createState() => _ProfileState();
+  _ContactDetailsState createState() => _ContactDetailsState();
 }
 
-class _ProfileState extends State<Profile> {
-  String updatedProfile;
+class _ContactDetailsState extends State<ContactDetails> {
+  ChatUser chatUser;
   User user;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     this.user = widget.user;
-    print(user.aadhar);
-  }
-
-  Future<void> upload(File image) async {}
-  Future getImageFromCamera() async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LoadingScreen(
-          message: "Uploading Camera ",
-          task: () async {
-            var image = await ImagePicker.pickImage(source: ImageSource.camera);
-            Navigator.pop(context);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => LoadingScreen(
-                        message: "Saving Profile Image",
-                        task: () async {
-                          dynamic s = await UploadService().uploadFile(image);
-                          String imageUrl = s.toString();
-                          print("calling userUpdate Service");
-                          User updateduser = await UserService()
-                              .saveProfileImage(user.email, imageUrl);
-                          Navigator.pop(context);
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Profile(
-                                        user: updateduser,
-                                      )));
-                        },
-                      )),
-            );
-          },
-        ),
-      ),
-    );
+    this.chatUser = widget.chatUser;
   }
 
   @override
@@ -89,15 +52,10 @@ class _ProfileState extends State<Profile> {
           children: <Widget>[
             Expanded(
                 flex: 5,
-                child: (user.profileImage == null)
-                    ? GestureDetector(
-                        onTap: () {
-                          getImageFromCamera();
-                        },
-                        child: CircleIcon(),
-                      )
+                child: (chatUser.profileImage == null)
+                    ? CircleIcon()
                     : CircleImage(
-                        imageUrl: user.profileImage,
+                        imageUrl: chatUser.profileImage,
                       )),
             Expanded(
                 flex: 1,
@@ -117,7 +75,7 @@ class _ProfileState extends State<Profile> {
                     Expanded(
                       flex: 2,
                       child: Text(
-                        user.name,
+                        chatUser.name,
                         style: _textFieldStyle,
                       ),
                     )
@@ -140,7 +98,7 @@ class _ProfileState extends State<Profile> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      user.email,
+                      chatUser.email,
                       style: _textFieldStyle,
                     ),
                   )
@@ -164,7 +122,7 @@ class _ProfileState extends State<Profile> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      user.phone,
+                      chatUser.phone,
                       style: _textFieldStyle,
                     ),
                   )
@@ -188,37 +146,69 @@ class _ProfileState extends State<Profile> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      user.aadhar,
+                      chatUser.aadhar,
                       style: _textFieldStyle,
                     ),
                   )
                 ],
               ),
             ),
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
+            (user.email != chatUser.email)
+                ? Expanded(
                     flex: 1,
                     child: Center(
-                      child: Text(
-                        "Password:",
-                        style: _textStyle,
+                      child: FlatButton(
+                        child: Text(
+                          "Send Message",
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        onPressed: () {
+                          if (chatUser.chatId != null) {
+                            Navigator.pop(context);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatScreen(
+                                    user: user,
+                                    chatUser: chatUser,
+                                  ),
+                                ));
+                          } else {
+                            Navigator.pop(context);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LoadingScreen(
+                                          message: "Preparing chat",
+                                          task: () async {
+                                            ChatMapping chatMapping =
+                                                await UserService()
+                                                    .createMapping(user.email,
+                                                        chatUser.email);
+                                            Navigator.pop(context);
+                                            if (chatMapping != null) {
+                                              chatUser.chatId = chatMapping.id;
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          ChatScreen(
+                                                            user: user,
+                                                            chatUser: chatUser,
+                                                          )));
+                                            }
+                                          },
+                                        )));
+                          }
+                        },
+                        color: Colors.grey[50],
                       ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      user.password,
-                      style: _textFieldStyle,
-                    ),
                   )
-                ],
-              ),
-            ),
+                : Expanded(
+                    flex: 1,
+                    child: Text(""),
+                  )
           ],
         ),
       ),
@@ -258,7 +248,7 @@ class CircleIcon extends StatelessWidget {
     return Center(
       child: new Container(
         child: FlatButton(
-          child: Icon(Icons.camera),
+          child: Icon(Icons.message),
         ),
         width: _size,
         height: _size,
