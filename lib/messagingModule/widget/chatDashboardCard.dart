@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/dto/ChatUser.dart';
 import 'package:lost_and_found/dto/User.dart';
 import 'package:lost_and_found/dto/chatMapping.dart';
 import 'package:lost_and_found/messagingModule/screens/chat_screen.dart';
+import 'package:lost_and_found/notifications/registerNotification.dart';
 import 'package:lost_and_found/services/userService.dart';
 
 class ChatDashboardCard extends StatefulWidget {
@@ -28,16 +30,23 @@ class _ChatDashboardCardState extends State<ChatDashboardCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         print("I taped");
         if (chatUser.chatId != null) {
+          var res = await Firestore.instance
+              .collection('users')
+              .where('email', isEqualTo: user.email)
+              .getDocuments();
+          String docId = res.documents.first.documentID;
+          await Firestore.instance
+              .collection('users')
+              .document(docId)
+              .updateData({'chattingWith': chatUser.email});
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ChatScreen(
-                  user: user,
-                  chatUser: chatUser,
-                ),
+                builder: (context) =>
+                    ChatScreen(user: user, chatUser: chatUser, docId: docId),
               ));
         }
       },

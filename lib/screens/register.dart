@@ -6,6 +6,7 @@ import 'package:lost_and_found/screens/loading.dart';
 import 'login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Register extends StatefulWidget {
   @override
@@ -36,6 +37,9 @@ class _RegisterState extends State<Register> {
               if (isRegistered != null) {
                 final authReg = await _auth.createUserWithEmailAndPassword(
                     email: isRegistered.email, password: isRegistered.password);
+                Firestore.instance
+                    .collection("users")
+                    .add({"email": isRegistered.email});
                 if (authReg == null) {
                   Navigator.pushNamed(context, "/");
                 }

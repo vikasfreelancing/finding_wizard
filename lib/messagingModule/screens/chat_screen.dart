@@ -15,9 +15,10 @@ import 'package:lost_and_found/dto/ChatUser.dart';
 final _firestore = Firestore.instance;
 
 class ChatScreen extends StatefulWidget {
-  ChatScreen({this.user, this.chatUser});
+  ChatScreen({this.user, this.chatUser, this.docId});
   final User user;
   final ChatUser chatUser;
+  final String docId;
   static const String id = 'chat_screen';
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -30,12 +31,31 @@ class _ChatScreenState extends State<ChatScreen> {
   String messageText;
   User user;
   ChatUser chatUser;
+  String docId;
   @override
   void initState() {
     super.initState();
     user = widget.user;
     this.chatUser = widget.chatUser;
+    this.docId = widget.docId;
     print("chat Started with chatId : " + chatUser.chatId);
+    print("chat Started with docId : $docId");
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    print("Deactivate called");
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    print("dispose called");
+    Firestore.instance
+        .collection('users')
+        .document(docId)
+        .updateData({'chattingWith': null});
   }
 
   @override
@@ -50,7 +70,11 @@ class _ChatScreenState extends State<ChatScreen> {
         actions: <Widget>[
           IconButton(
               icon: Icon(Icons.close),
-              onPressed: () {
+              onPressed: () async {
+                await Firestore.instance
+                    .collection('users')
+                    .document(docId)
+                    .updateData({'chattingWith': null});
                 Navigator.pop(context);
               }),
         ],

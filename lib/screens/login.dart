@@ -7,6 +7,7 @@ import 'package:lost_and_found/screens/lostItemViewList.dart';
 import 'package:lost_and_found/services/itemService.dart';
 import 'package:lost_and_found/services/userService.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lost_and_found/notifications/registerNotification.dart';
 
 class LogIn extends StatefulWidget {
   LogIn({this.message, this.color});
@@ -16,7 +17,25 @@ class LogIn extends StatefulWidget {
   _LogInState createState() => _LogInState(message: message, color: color);
 }
 
-class _LogInState extends State<LogIn> {
+class _LogInState extends State<LogIn> with WidgetsBindingObserver {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        print("app in resumed");
+        break;
+      case AppLifecycleState.inactive:
+        print("app in inactive");
+        break;
+      case AppLifecycleState.paused:
+        print("app in paused");
+        break;
+      case AppLifecycleState.detached:
+        print("app in detached");
+        break;
+    }
+  }
+
   final _auth = FirebaseAuth.instance;
   String email, password;
   Color color = Colors.green;
@@ -32,6 +51,7 @@ class _LogInState extends State<LogIn> {
                 User user = await UserService().loginUser(email, password);
                 if (user != null) {
                   print("Logged in user Id " + user.id);
+                  await Notifications(email: user.email).registerNotification();
                   Navigator.pop(context);
                   Navigator.push(
                     context,

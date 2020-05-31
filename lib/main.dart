@@ -8,12 +8,14 @@ import 'messagingModule/screens/welcome_screen.dart';
 import 'messagingModule/screens/login_screen.dart';
 import 'messagingModule/screens/registration_screen.dart';
 import 'messagingModule/screens/chat_screen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() => runApp(LostAndFoundApp());
 
 class LostAndFoundApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    //print(FirebaseMessaging().getToken());
     return MaterialApp(
       theme: ThemeData.dark().copyWith(
         primaryColor: Color(0xFF6D60FB),
