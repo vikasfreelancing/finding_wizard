@@ -62,13 +62,33 @@ class _ChatDashboardCardState extends State<ChatDashboardCard> {
                   Expanded(
                     flex: 2,
                     child: (chatUser.profileImage == null)
-                        ? Icon(
-                            Icons.message,
-                            size: 20,
-                            color: Colors.grey,
+                        ? Center(
+                            child: CircleAvatar(
+                              radius: 30,
+                              child: Image.asset("images/no_image.png"),
+                            ),
                           )
-                        : CircleImage(
-                            imageUrl: chatUser.profileImage,
+                        : Stack(
+                            children: <Widget>[
+                              Center(
+                                  child: CircularProgressIndicator(
+                                backgroundColor: Colors.blue,
+                              )),
+                              Center(
+                                child: Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                      fit: BoxFit.fill,
+                                      image:
+                                          NetworkImage(chatUser.profileImage),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
                           ),
                   ),
                   Expanded(

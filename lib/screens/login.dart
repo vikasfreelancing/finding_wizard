@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lost_and_found/constants/constants.dart';
+import 'package:lost_and_found/constants/message_constants.dart';
 import 'package:lost_and_found/model/LostItem.dart';
 import 'package:lost_and_found/screens/loading.dart';
 import 'package:lost_and_found/dto/User.dart';
@@ -18,6 +19,7 @@ class LogIn extends StatefulWidget {
 }
 
 class _LogInState extends State<LogIn> with WidgetsBindingObserver {
+  var messageConstants = MessageConstants();
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
@@ -46,7 +48,7 @@ class _LogInState extends State<LogIn> with WidgetsBindingObserver {
         context,
         MaterialPageRoute(
           builder: (context) => LoadingScreen(
-              message: "Checking Credentilas ",
+              message: messageConstants.CHECKING_CREDENTIALS,
               task: () async {
                 User user = await UserService().loginUser(email, password);
                 if (user != null) {
@@ -80,7 +82,7 @@ class _LogInState extends State<LogIn> with WidgetsBindingObserver {
                     context,
                     MaterialPageRoute(
                       builder: (context) => LogIn(
-                        message: "invalid user name or password",
+                        message: messageConstants.PERMISSION_DENIED,
                         color: Colors.red[900],
                       ),
                     ),

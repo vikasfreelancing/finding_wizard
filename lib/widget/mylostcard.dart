@@ -64,12 +64,6 @@ class _MyLostCardState extends State<MyLostCard> {
                   child: ListTile(
                     leading: Icon(Icons.message),
                     title: Text(
-                      'Posted by ${item.userId}',
-                      style: TextStyle(
-                          color: Colors.purple[900],
-                          fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
                       '${item.createdAt}',
                       style: TextStyle(
                           color: Colors.purple, fontWeight: FontWeight.normal),
@@ -79,9 +73,18 @@ class _MyLostCardState extends State<MyLostCard> {
               ),
               Expanded(
                 flex: 15,
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  child: Image.network(item.images),
+                child: Stack(
+                  children: <Widget>[
+                    Center(
+                        child: CircularProgressIndicator(
+                      backgroundColor: Colors.blue,
+                    )),
+                    Center(
+                      child: Container(
+                        child: Image.network(item.images),
+                      ),
+                    )
+                  ],
                 ),
               ),
               Expanded(

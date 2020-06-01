@@ -6,7 +6,7 @@ import 'sideMenu.dart';
 import 'package:lost_and_found/screens/loading.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:lost_and_found/services/itemService.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class Profile extends StatefulWidget {
   Profile({this.user});
@@ -77,7 +77,7 @@ class _ProfileState extends State<Profile> {
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Expanded(child: Text("Chat")),
+            Expanded(child: Text("Profile")),
           ],
         ),
       ),
@@ -94,7 +94,7 @@ class _ProfileState extends State<Profile> {
                         onTap: () {
                           getImageFromCamera();
                         },
-                        child: CircleIcon(),
+                        child: Image.asset("images/no_image.png"),
                       )
                     : CircleImage(
                         imageUrl: user.profileImage,
@@ -232,18 +232,26 @@ class CircleImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double _size = 200.0;
-    return Center(
-      child: new Container(
-        width: _size,
-        height: _size,
-        decoration: new BoxDecoration(
-          shape: BoxShape.circle,
-          image: new DecorationImage(
-            fit: BoxFit.fill,
-            image: new NetworkImage(imageUrl),
+    return Stack(
+      children: <Widget>[
+        Center(
+            child: CircularProgressIndicator(
+          backgroundColor: Colors.blue,
+        )),
+        Center(
+          child: Container(
+            width: _size,
+            height: _size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              image: DecorationImage(
+                fit: BoxFit.fill,
+                image: NetworkImage(imageUrl),
+              ),
+            ),
           ),
-        ),
-      ),
+        )
+      ],
     );
   }
 }

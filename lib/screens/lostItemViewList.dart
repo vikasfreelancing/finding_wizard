@@ -7,6 +7,8 @@ import 'package:lost_and_found/services/itemService.dart';
 import 'package:lost_and_found/widget/mylostcard.dart';
 import 'package:lost_and_found/widget/sideMenu.dart';
 import 'package:lost_and_found/screens/loading.dart';
+import 'package:lost_and_found/constants/message_constants.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class LostItemView extends StatefulWidget {
   LostItemView({this.items, this.user});
@@ -17,6 +19,7 @@ class LostItemView extends StatefulWidget {
 }
 
 class _LostItemViewState extends State<LostItemView> {
+  var messageConstants = MessageConstants();
   List<LostItem> items;
   User user;
   void loadData() async {
@@ -68,7 +71,7 @@ class _LostItemViewState extends State<LostItemView> {
     if (items != null && items.length == 0) {
       Container txt = Container(
           padding: EdgeInsets.symmetric(vertical: 150, horizontal: 10),
-          child: Text("No Request Recived ",
+          child: Text(messageConstants.NO_REQUESTS,
               style: kAppNameStyle.copyWith(color: Colors.green[900])));
       cards.add(txt);
     } else

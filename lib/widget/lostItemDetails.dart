@@ -62,7 +62,7 @@ class _LostItemDetailsState extends State<LostItemDetails> {
                         child: ListTile(
                           leading: Icon(Icons.message),
                           title: Text(
-                            'Posted by ${lostItemDetails.user.name}',
+                            'Founded by ${lostItemDetails.user.name}',
                             style: TextStyle(
                                 color: Colors.purple[900],
                                 fontWeight: FontWeight.bold),
@@ -78,9 +78,24 @@ class _LostItemDetailsState extends State<LostItemDetails> {
                     ),
                     Expanded(
                       flex: 15,
-                      child: Container(
-                        padding: EdgeInsets.all(10),
-                        child: Image.network(lostItemDetails.foundItem.images),
+                      child: Center(
+                        child: Stack(
+                          children: <Widget>[
+                            Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  padding: EdgeInsets.all(15),
+                                  child: Image.network(
+                                      lostItemDetails.foundItem.images),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                     Expanded(
